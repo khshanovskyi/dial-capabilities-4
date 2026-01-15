@@ -1,0 +1,303 @@
+{
+  "applications": {
+    "chat_hub_gpt5_quickapp": {
+      "displayName": "ChatHub - GPT-5 (QuickApp)",
+      "description": "Agent with vision, image generation, documents RAG, web search and python code interpretation capabilities.",
+      "applicationTypeSchemaId": "https://mydial.epam.com/custom_application_schemas/quickapps2",
+      "applicationProperties": {
+        "orchestrator": {
+          "deployment": {
+            "name": "gpt-5",
+            "parameters": {}
+          },
+          "system_prompt": {
+            "type": "predefined",
+            "template": "gpt_prompt"
+          }
+        },
+        "contexts": [],
+        "tool_sets": [
+          {
+            "name": "dial-deployment-tool-set",
+            "type": "dial-deployment",
+            "description": "Set with DIAL deployments tools",
+            "tools": [
+              {
+                "type": "deployment-tool",
+                "display": {
+                  "stage": {
+                    "name": "Image Generation: "
+                  }
+                },
+                "deployment": {
+                  "name": "dall-e-3"
+                },
+                "open_ai_tool": {
+                  "type": "function",
+                  "function": {
+                    "name": "image_generation_tool",
+                    "description": "**Image generator** Generates image based on the provided description.\n\n## Instructions:\n- Use that tool when user asks to generate an image based on the description or to visualize some text or information.\n- Choose the best size from available options based on user request or image type. For specific size requests, use the closest supported option.\n- When the tool returns a markdown image URL, always include it in your response and follow it with a brief description.\n\n## Restrictions:\n- Never use this tool for data or numerical information visualization.",
+                    "parameters": {
+                      "type": "object",
+                      "properties": {
+                        "query": {
+                          "type": "string",
+                          "description": "Extensive description of the image that should be generated.",
+                          "display": {
+                            "stage": {
+                              "show_value_in_stage_title": true,
+                              "name": "**Prompt:** "
+                            }
+                          }
+                        },
+                        "size": {
+                          "type": "string",
+                          "description": "The size of the generated image. ",
+                          "enum": [
+                            "1024x1024",
+                            "1024x1792",
+                            "1792x1024"
+                          ],
+                          "default": "1024x1024",
+                          "display": {
+                            "stage": {
+                              "name": "**Image size:** "
+                            }
+                          }
+                        },
+                        "style": {
+                          "type": "string",
+                          "description": "The style of the generated image. Must be one of vivid or natural. Vivid causes the model to lean towards generating hyper-real and dramatic images. Natural causes the model to produce more natural, less hyper-real looking images.",
+                          "enum": [
+                            "natural",
+                            "vivid"
+                          ],
+                          "default": "natural",
+                          "display": {
+                            "stage": {
+                              "name": "**Image style:** "
+                            }
+                          }
+                        },
+                        "quality": {
+                          "type": "string",
+                          "description": "The quality of the image that will be generated. `hd` creates images with finer details and greater consistency across the image.",
+                          "enum": [
+                            "standard",
+                            "hd"
+                          ],
+                          "default": "standard",
+                          "display": {
+                            "stage": {
+                              "name": "**Image quality:** "
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "query",
+                        "size",
+                        "style",
+                        "quality"
+                      ]
+                    }
+                  }
+                },
+                "fallback_configuration": {
+                  "strategies": [
+                    {
+                      "type": "continue"
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "deployment-tool",
+                "display": {
+                  "stage": {
+                    "name": "WEB Search: "
+                  }
+                },
+                "deployment": {
+                  "name": "gpt-5-search-api"
+                },
+                "open_ai_tool": {
+                  "type": "function",
+                  "function": {
+                    "name": "web_search_tool",
+                    "description": "WEB Search tool",
+                    "parameters": {
+                      "type": "object",
+                      "properties": {
+                        "query": {
+                          "type": "string",
+                          "description": "Query to search in WEB",
+                          "display": {
+                            "stage": {
+                              "show_value_in_stage_title": true,
+                              "name": "**Prompt:** "
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "query"
+                      ]
+                    }
+                  }
+                },
+                "fallback_configuration": {
+                  "strategies": [
+                    {
+                      "type": "continue"
+                    }
+                  ]
+                }
+              },
+              {
+                "type": "deployment-tool",
+                "display": {
+                  "stage": {
+                    "name": "TTS: "
+                  }
+                },
+                "deployment": {
+                  "name": "gpt-4o-mini-tts"
+                },
+                "open_ai_tool": {
+                  "type": "function",
+                  "function": {
+                    "name": "text_to_speech_tool",
+                    "description": "Converts text to speech and returns audio file and",
+                    "parameters": {
+                      "type": "object",
+                      "properties": {
+                        "query": {
+                          "type": "string",
+                          "description": "Text that should be converted to speech",
+                          "display": {
+                            "stage": {
+                              "show_value_in_stage_title": true,
+                              "name": "**Prompt:** "
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "query"
+                      ]
+                    }
+                  }
+                },
+                "fallback_configuration": {
+                  "strategies": [
+                    {
+                      "type": "continue"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ],
+        "starters": [
+          "What's the weather in London?",
+          "What can you do?",
+          "What tools do you have?"
+        ]
+      },
+      "inputAttachmentTypes": [
+        "*/*"
+      ]
+    }
+  },
+  "models": {
+    "gpt-4o": {
+      "displayName": "GPT 4o",
+      "overrideName": "gpt-4o",
+      "endpoint": "http://adapter-dial-openai:5000/openai/deployments/gpt-4o/chat/completions",
+      "iconUrl": "http://localhost:3001/gpt4.svg",
+      "type": "chat",
+      "upstreams": [
+        {
+          "endpoint": "https://api.openai.com/v1/chat/completions",
+          "key": "${API_KEY}"
+        }
+      ],
+      "features": {
+        "system_prompt_supported": true,
+        "tools_supported": true
+      }
+    },
+    "gpt-5": {
+      "displayName": "GPT 5",
+      "overrideName": "gpt-5",
+      "endpoint": "http://adapter-dial-openai:5000/openai/deployments/gpt-5/chat/completions",
+      "iconUrl": "http://localhost:3001/gpt4.svg",
+      "type": "chat",
+      "description": "GPT-5, a full reasoning model provides deep, richer reasoning for analytics and complex tasks, like code generation, with a 272k token context.",
+      "upstreams": [
+        {
+          "endpoint": "https://api.openai.com/v1/responses",
+          "key": "${API_KEY}"
+        }
+      ],
+      "features": {
+        "system_prompt_supported": true,
+        "tools_supported": true
+      }
+    },
+    "gpt-5-search-api": {
+      "displayName": "GPT 5-1",
+      "overrideName": "gpt-5-search-api",
+      "endpoint": "http://adapter-dial-openai:5000/openai/deployments/gpt-5-search-api/chat/completions",
+      "iconUrl": "http://localhost:3001/gpt4.svg",
+      "type": "chat",
+      "description": "GPT-5, a full reasoning model provides deep, richer reasoning for analytics and complex tasks, provides with WEB Search capabilities.",
+      "upstreams": [
+        {
+          "endpoint": "https://api.openai.com/v1/chat/completions",
+          "key": "${API_KEY}"
+        }
+      ]
+    },
+    "dall-e-3": {
+      "type": "chat",
+      "endpoint": "http://adapter-dial-openai:5000/openai/deployments/dall-e-3/chat/completions",
+      "overrideName": "dall-e-3",
+      "description": "DALL-E is a machine-learning model developed by OpenAI. It is designed to produce images from language descriptions, a process known as text-to-image descriptions or prompts.\n\nThe system can generate realistic images just from a description of the scene. DALL-E is a neural network algorithm that creates accurate pictures from short phrases provided by the user. It comprehends language through textual descriptions and from “learning” information provided in its datasets by users and developers.",
+      "upstreams": [
+        {
+          "endpoint": "https://api.openai.com/v1/images/generations",
+          "key": "${API_KEY}"
+        }
+      ],
+      "interceptors": [
+        "chat-image-watermark"
+      ]
+    },
+    "gpt-4o-mini-tts": {
+      "type": "chat",
+      "endpoint": "http://adapter-dial-openai:5000/openai/deployments/gpt-4o-mini-tts/chat/completions",
+      "overrideName": "gpt-4o-mini-tts",
+      "description": "GPT-4o mini TTS is a text-to-speech model built on GPT-4o mini, a fast and powerful language model. Use it to convert text to natural sounding spoken text. The maximum number of input tokens is 2000.",
+      "upstreams": [
+        {
+          "endpoint": "https://api.openai.com/v1/audio/speech",
+          "key": "${API_KEY}"
+        }
+      ]
+    }
+  },
+  "keys": {
+    "dial_api_key": {
+      "project": "TEST-PROJECT",
+      "role": "default"
+    }
+  },
+  "roles": {
+    "default": {
+      "limits": {}
+    }
+  }
+}
